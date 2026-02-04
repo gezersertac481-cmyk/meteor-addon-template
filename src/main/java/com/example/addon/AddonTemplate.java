@@ -1,4 +1,4 @@
-package com.örnek.Ayriyeten;
+package com.example.addon;
 
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class AddonTemplate extends MeteorAddon {
     public static final Logger LOG = LoggerFactory.getLogger("ItemTracersAddon");
-    public static final Category CATEGORY = new Category("Ozel");
+    public static final Category CATEGORY = new Category("Custom");
 
     @Override
     public void onInitialize() {
@@ -31,12 +31,12 @@ public class AddonTemplate extends MeteorAddon {
 
     @Override
     public String getPackage() {
-        return "com.örnek.Ayriyeten";
+        return "com.example.addon";
     }
 
     public static class ItemTracersModul extends Module {
         public ItemTracersModul() {
-            super(CATEGORY, "item-tracers-plus", "Eşyaları renkli çizgilerle takip eder.");
+            super(CATEGORY, "item-tracers-plus", "Follow items with colored lines.");
         }
 
         @EventHandler
