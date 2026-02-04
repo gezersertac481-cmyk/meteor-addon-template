@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 
 public class AddonTemplate extends MeteorAddon {
     public static final Logger LOG = LoggerFactory.getLogger("ItemTracersAddon");
-    public static final Category CATEGORY = new Category("Özel");
+    public static final Category CATEGORY = new Category("Ozel");
 
     @Override
     public void onInitialize() {
-        LOG.info("Eklenti Başlatıldı!");
+        LOG.info("Addon Initialized!");
         Modules.get().add(new ItemTracersModul());
     }
 
@@ -43,14 +43,11 @@ public class AddonTemplate extends MeteorAddon {
         private void onRender(Render3DEvent event) {
             for (Entity entity : mc.world.getEntities()) {
                 if (entity instanceof ItemEntity item) {
-                    Color color = new Color(255, 255, 255, 150); // Varsayılan Beyaz
+                    Color color = new Color(255, 255, 255, 150); 
                     var type = item.getStack().getItem();
 
-                    if (type == Items.ANCIENT_DEBRIS) {
-                        color = new Color(255, 0, 0, 255); // Antik Kalıntı -> Kırmızı
-                    } else if (type == Items.OAK_LOG || type == Items.STRIPPED_OAK_LOG) {
-                        color = new Color(0, 0, 255, 255); // Odun -> Mavi
-                    }
+                    if (type == Items.ANCIENT_DEBRIS) color = new Color(255, 0, 0, 255); 
+                    else if (type == Items.OAK_LOG || type == Items.STRIPPED_OAK_LOG) color = new Color(0, 0, 255, 255);
 
                     Vec3d start = new Vec3d(0, 0, 75)
                         .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
