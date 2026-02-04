@@ -23,8 +23,6 @@ public class AddonTemplate extends MeteorAddon {
     @Override
     public void onInitialize() {
         LOG.info("Initializing Item Tracers Addon");
-
-        // Sadece senin modülünü ekliyoruz
         Modules.get().add(new ItemTracers());
     }
 
@@ -52,8 +50,8 @@ public class AddonTemplate extends MeteorAddon {
                     Color color = new Color(255, 255, 255, 150);
                     if (item.getStack().getItem() == Items.ANCIENT_DEBRIS) color = new Color(255, 0, 0, 255);
 
-                    // Kameranın pozisyonunu hata raporundaki hataya göre düzelttim
-                    Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
+                    // HATA BURADAYDI: mc.gameRenderer.getCamera().getPos() yerine Yarn standartı olan pos kullanıldı
+                    Vec3d cameraPos = mc.gameRenderer.getCamera().pos;
 
                     event.renderer.line(
                         cameraPos.x, cameraPos.y, cameraPos.z,
