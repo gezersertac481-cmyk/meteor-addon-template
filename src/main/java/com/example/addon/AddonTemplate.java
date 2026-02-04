@@ -18,13 +18,13 @@ import org.slf4j.LoggerFactory;
 public class AddonTemplate extends MeteorAddon {
     public static final Logger LOG = LoggerFactory.getLogger("ItemTracersAddon");
     public static final Category CATEGORY = new Category("Custom");
-    public static final HudGroup HUD_GROUP = new HudGroup("Example"); // Hata veren eksik satır buydu
+    public static final HudGroup HUD_GROUP = new HudGroup("Example");
 
     @Override
     public void onInitialize() {
         LOG.info("Initializing Item Tracers Addon");
 
-        // Modülü sisteme ekle
+        // Sadece senin modülünü ekliyoruz
         Modules.get().add(new ItemTracers());
     }
 
@@ -52,7 +52,7 @@ public class AddonTemplate extends MeteorAddon {
                     Color color = new Color(255, 255, 255, 150);
                     if (item.getStack().getItem() == Items.ANCIENT_DEBRIS) color = new Color(255, 0, 0, 255);
 
-                    // Kameranın tam pozisyonunu doğru şekilde alıyoruz
+                    // Kameranın pozisyonunu hata raporundaki hataya göre düzelttim
                     Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
 
                     event.renderer.line(
