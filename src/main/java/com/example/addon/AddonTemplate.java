@@ -1,35 +1,27 @@
-package com.example.addon;
+package com.örnek.Ayriyeten;
 
-import com.example.addon.commands.CommandExample;
-import com.example.addon.hud.HudExample;
-import com.example.addon.modules.ModuleExample;
-import com.mojang.logging.LogUtils;
-import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
-import meteordevelopment.meteorclient.commands.Commands;
-import meteordevelopment.meteorclient.systems.hud.Hud;
-import meteordevelopment.meteorclient.systems.hud.HudGroup;
-import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.Category;
+import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.orbit.EventHandler;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.ItemEntity;
+import net.minecraft.item.Items;
+import net.minecraft.util.math.Vec3d;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AddonTemplate extends MeteorAddon {
-    public static final Logger LOG = LogUtils.getLogger();
-    public static final Category CATEGORY = new Category("Example");
-    public static final HudGroup HUD_GROUP = new HudGroup("Example");
+    public static final Logger LOG = LoggerFactory.getLogger("ItemTracersAddon");
+    public static final Category CATEGORY = new Category("Özel");
 
     @Override
     public void onInitialize() {
-        LOG.info("Initializing Meteor Addon Template");
-
-        // Modules
-        Modules.get().add(new ModuleExample());
-
-        // Commands
-        Commands.add(new CommandExample());
-
-        // HUD
-        Hud.get().register(HudExample.INFO);
+        LOG.info("Eklenti Başlatıldı!");
+        Modules.get().add(new ItemTracersModul());
     }
 
     @Override
@@ -39,11 +31,35 @@ public class AddonTemplate extends MeteorAddon {
 
     @Override
     public String getPackage() {
-        return "com.example.addon";
+        return "com.örnek.Ayriyeten";
     }
 
-    @Override
-    public GithubRepo getRepo() {
-        return new GithubRepo("MeteorDevelopment", "meteor-addon-template");
+    public static class ItemTracersModul extends Module {
+        public ItemTracersModul() {
+            super(CATEGORY, "item-tracers-plus", "Eşyaları renkli çizgilerle takip eder.");
+        }
+
+        @EventHandler
+        private void onRender(Render3DEvent event) {
+            for (Entity entity : mc.world.getEntities()) {
+                if (entity instanceof ItemEntity item) {
+                    Color color = new Color(255, 255, 255, 150); // Varsayılan Beyaz
+                    var type = item.getStack().getItem();
+
+                    if (type == Items.ANCIENT_DEBRIS) {
+                        color = new Color(255, 0, 0, 255); // Antik Kalıntı -> Kırmızı
+                    } else if (type == Items.OAK_LOG || type == Items.STRIPPED_OAK_LOG) {
+                        color = new Color(0, 0, 255, 255); // Odun -> Mavi
+                    }
+
+                    Vec3d start = new Vec3d(0, 0, 75)
+                        .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
+                        .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
+                        .add(mc.gameRenderer.getCamera().getPos());
+
+                    event.renderer.line(start.x, start.y, start.z, item.getX(), item.getY(), item.getZ(), color);
+                }
+            }
+        }
     }
 }
