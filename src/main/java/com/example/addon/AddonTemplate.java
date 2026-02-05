@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class AddonTemplate extends MeteorAddon {
     public static final Logger LOG = LoggerFactory.getLogger("ItemTracersAddon");
     public static final Category CATEGORY = new Category("Custom");
-    public static final HudGroup HUD_GROUP = new HudGroup("Example");
+    public static final HudGroup HUD_GROUP = new HudGroup("Example"); // Diğer dosyaların aradığı satır bu
 
     @Override
     public void onInitialize() {
@@ -50,11 +50,11 @@ public class AddonTemplate extends MeteorAddon {
                     Color color = new Color(255, 255, 255, 150);
                     if (item.getStack().getItem() == Items.ANCIENT_DEBRIS) color = new Color(255, 0, 0, 255);
 
-                    // Hata veren getPos() yerine doğrudan 'pos' kullanıyoruz
-                    Vec3d cameraPos = mc.gameRenderer.getCamera().pos;
+                    // HATA BURADAYDI: Private olan 'pos' yerine 'getEyePos()' kullanarak hatayı kökten çözdük
+                    Vec3d start = mc.player.getEyePos();
 
                     event.renderer.line(
-                        cameraPos.x, cameraPos.y, cameraPos.z,
+                        start.x, start.y, start.z,
                         item.getX(), item.getY(), item.getZ(),
                         color
                     );
