@@ -6,7 +6,6 @@ import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.ItemEntity;
@@ -50,24 +49,21 @@ public class AddonTemplate extends MeteorAddon {
         );
 
         public ItemTracers() {
-            super(CATEGORY, "item-tracers-plus", "Eşyaları artı işaretinden takip eder.");
+            super(CATEGORY, "item-tracers-plus", "Eşyaları takip eder.");
         }
 
         @EventHandler
         private void onRender(Render3DEvent event) {
-            if (mc.world == null) return;
+            if (mc.world == null || mc.player == null) return;
             
-            // 1.21.4'te verimli tarama
             mc.world.getEntities().forEach(entity -> {
                 if (entity instanceof ItemEntity item) {
                     if (!items.get().contains(item.getStack().getItem())) return;
                     
-                    // RenderUtils.center kullanarak hata riskini sıfıra indirdik
+                    // En güvenli çizgi yöntemi: Oyuncunun gözünden eşyaya
                     event.renderer.line(
-                        RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z,
-                        item.lastRenderX + (item.getX() - item.lastRenderX) * event.tickDelta,
-                        item.lastRenderY + (item.getY() - item.lastRenderY) * event.tickDelta + 0.1,
-                        item.lastRenderZ + (item.getZ() - item.lastRenderZ) * event.tickDelta,
+                        mc.player.getX(), mc.player.getEyeY(), mc.player.getZ(),
+                        item.getX(), item.getY() + 0.2, item.getZ(),
                         lineColor.get()
                     );
                 }
