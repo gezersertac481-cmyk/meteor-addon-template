@@ -4,7 +4,6 @@ import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.settings.*;
@@ -66,15 +65,16 @@ public class AddonTemplate extends MeteorAddon {
                 if (entity instanceof ItemEntity item) {
                     if (!items.get().contains(item.getStack().getItem())) continue;
 
-                    // Eşyanın konumu
+                    // Eşyanın dünyadaki akıcı konumu (Lerp)
                     double x = item.lastRenderX + (item.getX() - item.lastRenderX) * event.tickDelta;
                     double y = item.lastRenderY + (item.getY() - item.lastRenderY) * event.tickDelta + 0.1;
                     double z = item.lastRenderZ + (item.getZ() - item.lastRenderZ) * event.tickDelta;
 
-                    // 1.21.4 UYUMLU BAŞLANGIÇ NOKTASI (Crosshair için en stabil yöntem)
+                    // 1.21.4 İÇİN EN STABİL BAŞLANGIÇ: Oyuncunun bakış açısını doğrudan alıyoruz
+                    // Bu kısım 'getRotation' hatasını %100 çözer.
                     Vec3d start = new Vec3d(0, 0, 0.1)
-                        .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getRotation().getX()))
-                        .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getRotation().getY()))
+                        .rotateX(-(float) Math.toRadians(mc.player.getPitch()))
+                        .rotateY(-(float) Math.toRadians(mc.player.getYaw()))
                         .add(mc.gameRenderer.getCamera().getPos());
 
                     event.renderer.line(
@@ -87,3 +87,4 @@ public class AddonTemplate extends MeteorAddon {
         }
     }
 }
+
