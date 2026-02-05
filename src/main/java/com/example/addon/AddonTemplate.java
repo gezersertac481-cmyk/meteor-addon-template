@@ -10,16 +10,13 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import java.util.List;
 
 public class AddonTemplate extends MeteorAddon {
     public static final Category CATEGORY = new Category("Custom");
 
     @Override
     public void onInitialize() {
-        // Sadece modülümüzü yüklüyoruz.
         Modules.get().add(new ItemTracers());
     }
 
@@ -36,15 +33,14 @@ public class AddonTemplate extends MeteorAddon {
     public static class ItemTracers extends Module {
         private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-        // 1. Kontrol: Eşya listesi ayarı (Hata riskine karşı kütüphane yolu doğrulandı)
-        private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
-            .name("items")
-            .description("Takip edilecek eşyaları seçin.")
-            .defaultValue(List.of(Items.ANCIENT_DEBRIS))
+        // Karmaşık liste yerine basit aç/kapat ayarı (Hata riskini bitirir)
+        private final Setting<Boolean> onlyDebris = sgGeneral.add(new BoolSetting.Builder()
+            .name("only-ancient-debris")
+            .description("Sadece Antik Kalıntıları gösterir.")
+            .defaultValue(true)
             .build()
         );
 
-        // 2. Kontrol: Renk ayarı
         private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("line-color")
             .description("Çizgi rengi.")
@@ -53,27 +49,27 @@ public class AddonTemplate extends MeteorAddon {
         );
 
         public ItemTracers() {
-            super(CATEGORY, "item-tracers-plus", "Seçili eşyaları takip eder.");
+            super(CATEGORY, "item-tracers-plus", "Yerdeki eşyaları takip eder.");
         }
 
         @EventHandler
         private void onRender(Render3DEvent event) {
             if (mc.world == null || mc.player == null) return;
 
-            // 3. Kontrol: Döngü ve Çizim metodu
-            // Hata veren karmaşık yöntemler yerine en kararlı mc.player koordinatlarını kullandık.
             for (Entity entity : mc.world.getEntities()) {
                 if (entity instanceof ItemEntity item) {
-                    if (!items.get().contains(item.getStack().getItem())) continue;
+                    // Filtreleme
+                    if (onlyDebris.get() && item.getStack().getItem() != Items.ANCIENT_DEBRIS) continue;
 
-                    // Çizgiyi oyuncunun gözünden eşyanın konumuna çizer
+                    // 1.21.4'te Render3DEvent artık renderer'ı metodla çağırıyor olabilir
+                    // En güvenli çizim:
+                    double x = item.getX();
+                    double y = item.getY() + 0.1;
+                    double z = item.getZ();
+
                     event.renderer.line(
-                        mc.player.getX(), 
-                        mc.player.getEyeY(), 
-                        mc.player.getZ(),
-                        item.getX(), 
-                        item.getY() + 0.1, 
-                        item.getZ(),
+                        mc.player.getX(), mc.player.getEyeY(), mc.player.getZ(),
+                        x, y, z,
                         lineColor.get()
                     );
                 }
