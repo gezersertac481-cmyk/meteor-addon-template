@@ -33,23 +33,15 @@ public class AddonTemplate extends MeteorAddon {
     public static class ItemTracers extends Module {
         private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-        // Karmaşık liste yerine basit aç/kapat ayarı (Hata riskini bitirir)
-        private final Setting<Boolean> onlyDebris = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-ancient-debris")
-            .description("Sadece Antik Kalıntıları gösterir.")
-            .defaultValue(true)
-            .build()
-        );
-
-        private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("line-color")
+        private final Setting<SettingColor> color = sgGeneral.add(new ColorSetting.Builder()
+            .name("color")
             .description("Çizgi rengi.")
             .defaultValue(new SettingColor(255, 0, 0, 255))
             .build()
         );
 
         public ItemTracers() {
-            super(CATEGORY, "item-tracers-plus", "Yerdeki eşyaları takip eder.");
+            super(CATEGORY, "item-tracers", "Yerdeki eşyaları takip eder.");
         }
 
         @EventHandler
@@ -58,19 +50,13 @@ public class AddonTemplate extends MeteorAddon {
 
             for (Entity entity : mc.world.getEntities()) {
                 if (entity instanceof ItemEntity item) {
-                    // Filtreleme
-                    if (onlyDebris.get() && item.getStack().getItem() != Items.ANCIENT_DEBRIS) continue;
-
-                    // 1.21.4'te Render3DEvent artık renderer'ı metodla çağırıyor olabilir
-                    // En güvenli çizim:
-                    double x = item.getX();
-                    double y = item.getY() + 0.1;
-                    double z = item.getZ();
+                    // Sadece Antik Kalıntı (Hata riskini sıfırlamak için sabitledik)
+                    if (item.getStack().getItem() != Items.ANCIENT_DEBRIS) continue;
 
                     event.renderer.line(
                         mc.player.getX(), mc.player.getEyeY(), mc.player.getZ(),
-                        x, y, z,
-                        lineColor.get()
+                        item.getX(), item.getY(), item.getZ(),
+                        color.get()
                     );
                 }
             }
