@@ -15,12 +15,10 @@ import net.minecraft.item.Items;
 import java.util.List;
 
 public class AddonTemplate extends MeteorAddon {
-    // Kategori burada tanımlı, dışarıdan (HudExample gibi) bir şey beklemiyor
     public static final Category CATEGORY = new Category("Custom");
 
     @Override
     public void onInitialize() {
-        // Sadece kendi modülümüzü yüklüyoruz, diğer hatalı örnekleri pas geçiyoruz
         Modules.get().add(new ItemTracers());
     }
 
@@ -37,7 +35,6 @@ public class AddonTemplate extends MeteorAddon {
     public static class ItemTracers extends Module {
         private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-        // Seçilebilir eşya listesi ayarı
         private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("items")
             .description("Takip edilecek eşyaları seçin.")
@@ -45,7 +42,6 @@ public class AddonTemplate extends MeteorAddon {
             .build()
         );
 
-        // Çizgi rengi ayarı
         private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("line-color")
             .description("Çizgi rengi.")
@@ -60,22 +56,18 @@ public class AddonTemplate extends MeteorAddon {
         @EventHandler
         private void onRender(Render3DEvent event) {
             if (mc.world == null) return;
-
-            // Dünyadaki tüm varlıkları tara
+            
+            // 1.21.4'te verimli tarama
             mc.world.getEntities().forEach(entity -> {
                 if (entity instanceof ItemEntity item) {
-                    // Sadece seçili eşyaları filtrele
                     if (!items.get().contains(item.getStack().getItem())) return;
-
-                    // 1.21.4 uyumlu akıcı koordinat (lastRenderX/Y/Z)
-                    double x = item.lastRenderX + (item.getX() - item.lastRenderX) * event.tickDelta;
-                    double y = item.lastRenderY + (item.getY() - item.lastRenderY) * event.tickDelta + 0.1;
-                    double z = item.lastRenderZ + (item.getZ() - item.lastRenderZ) * event.tickDelta;
-
-                    // Çizgiyi RenderUtils.center ile tam artı işaretinden başlat
+                    
+                    // RenderUtils.center kullanarak hata riskini sıfıra indirdik
                     event.renderer.line(
                         RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z,
-                        x, y, z,
+                        item.lastRenderX + (item.getX() - item.lastRenderX) * event.tickDelta,
+                        item.lastRenderY + (item.getY() - item.lastRenderY) * event.tickDelta + 0.1,
+                        item.lastRenderZ + (item.getZ() - item.lastRenderZ) * event.tickDelta,
                         lineColor.get()
                     );
                 }
