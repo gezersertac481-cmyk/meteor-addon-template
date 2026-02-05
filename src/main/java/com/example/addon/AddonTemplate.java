@@ -50,7 +50,7 @@ public class AddonTemplate extends MeteorAddon {
                     Color color = new Color(255, 255, 255, 150);
                     if (item.getStack().getItem() == Items.ANCIENT_DEBRIS) color = new Color(255, 0, 0, 255);
 
-                    // HATA BURADAYDI: mc.gameRenderer.getCamera().getPos() yerine Yarn standartı olan pos kullanıldı
+                    // Hata veren getPos() yerine doğrudan 'pos' kullanıyoruz
                     Vec3d cameraPos = mc.gameRenderer.getCamera().pos;
 
                     event.renderer.line(
