@@ -8,6 +8,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -18,6 +19,7 @@ public class AddonTemplate extends MeteorAddon {
 
     @Override
     public void onInitialize() {
+        // Sadece modülümüzü yüklüyoruz.
         Modules.get().add(new ItemTracers());
     }
 
@@ -34,6 +36,7 @@ public class AddonTemplate extends MeteorAddon {
     public static class ItemTracers extends Module {
         private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+        // 1. Kontrol: Eşya listesi ayarı (Hata riskine karşı kütüphane yolu doğrulandı)
         private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("items")
             .description("Takip edilecek eşyaları seçin.")
@@ -41,6 +44,7 @@ public class AddonTemplate extends MeteorAddon {
             .build()
         );
 
+        // 2. Kontrol: Renk ayarı
         private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("line-color")
             .description("Çizgi rengi.")
@@ -49,25 +53,31 @@ public class AddonTemplate extends MeteorAddon {
         );
 
         public ItemTracers() {
-            super(CATEGORY, "item-tracers-plus", "Eşyaları takip eder.");
+            super(CATEGORY, "item-tracers-plus", "Seçili eşyaları takip eder.");
         }
 
         @EventHandler
         private void onRender(Render3DEvent event) {
             if (mc.world == null || mc.player == null) return;
-            
-            mc.world.getEntities().forEach(entity -> {
+
+            // 3. Kontrol: Döngü ve Çizim metodu
+            // Hata veren karmaşık yöntemler yerine en kararlı mc.player koordinatlarını kullandık.
+            for (Entity entity : mc.world.getEntities()) {
                 if (entity instanceof ItemEntity item) {
-                    if (!items.get().contains(item.getStack().getItem())) return;
-                    
-                    // En güvenli çizgi yöntemi: Oyuncunun gözünden eşyaya
+                    if (!items.get().contains(item.getStack().getItem())) continue;
+
+                    // Çizgiyi oyuncunun gözünden eşyanın konumuna çizer
                     event.renderer.line(
-                        mc.player.getX(), mc.player.getEyeY(), mc.player.getZ(),
-                        item.getX(), item.getY() + 0.2, item.getZ(),
+                        mc.player.getX(), 
+                        mc.player.getEyeY(), 
+                        mc.player.getZ(),
+                        item.getX(), 
+                        item.getY() + 0.1, 
+                        item.getZ(),
                         lineColor.get()
                     );
                 }
-            });
+            }
         }
     }
 }
