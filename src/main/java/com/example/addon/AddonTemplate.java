@@ -6,23 +6,21 @@ import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.util.math.Vec3d;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class AddonTemplate extends MeteorAddon {
-    public static final Logger LOG = LoggerFactory.getLogger("ItemTracersAddon");
+    // Kategori burada tanımlı, dışarıdan (HudExample gibi) bir şey beklemiyor
     public static final Category CATEGORY = new Category("Custom");
 
     @Override
     public void onInitialize() {
+        // Sadece kendi modülümüzü yüklüyoruz, diğer hatalı örnekleri pas geçiyoruz
         Modules.get().add(new ItemTracers());
     }
 
@@ -39,6 +37,7 @@ public class AddonTemplate extends MeteorAddon {
     public static class ItemTracers extends Module {
         private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+        // Seçilebilir eşya listesi ayarı
         private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("items")
             .description("Takip edilecek eşyaları seçin.")
@@ -46,6 +45,7 @@ public class AddonTemplate extends MeteorAddon {
             .build()
         );
 
+        // Çizgi rengi ayarı
         private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("line-color")
             .description("Çizgi rengi.")
@@ -54,37 +54,32 @@ public class AddonTemplate extends MeteorAddon {
         );
 
         public ItemTracers() {
-            super(CATEGORY, "item-tracers-plus", "Seçili eşyaları artı işaretinden takip eder.");
+            super(CATEGORY, "item-tracers-plus", "Eşyaları artı işaretinden takip eder.");
         }
 
         @EventHandler
         private void onRender(Render3DEvent event) {
-            if (mc.world == null || mc.player == null) return;
+            if (mc.world == null) return;
 
-            for (Entity entity : mc.world.getEntities()) {
+            // Dünyadaki tüm varlıkları tara
+            mc.world.getEntities().forEach(entity -> {
                 if (entity instanceof ItemEntity item) {
-                    if (!items.get().contains(item.getStack().getItem())) continue;
+                    // Sadece seçili eşyaları filtrele
+                    if (!items.get().contains(item.getStack().getItem())) return;
 
-                    // Eşyanın dünyadaki akıcı konumu (Lerp)
+                    // 1.21.4 uyumlu akıcı koordinat (lastRenderX/Y/Z)
                     double x = item.lastRenderX + (item.getX() - item.lastRenderX) * event.tickDelta;
                     double y = item.lastRenderY + (item.getY() - item.lastRenderY) * event.tickDelta + 0.1;
                     double z = item.lastRenderZ + (item.getZ() - item.lastRenderZ) * event.tickDelta;
 
-                    // 1.21.4 İÇİN EN STABİL BAŞLANGIÇ: Oyuncunun bakış açısını doğrudan alıyoruz
-                    // Bu kısım 'getRotation' hatasını %100 çözer.
-                    Vec3d start = new Vec3d(0, 0, 0.1)
-                        .rotateX(-(float) Math.toRadians(mc.player.getPitch()))
-                        .rotateY(-(float) Math.toRadians(mc.player.getYaw()))
-                        .add(mc.gameRenderer.getCamera().getPos());
-
+                    // Çizgiyi RenderUtils.center ile tam artı işaretinden başlat
                     event.renderer.line(
-                        start.x, start.y, start.z,
+                        RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z,
                         x, y, z,
                         lineColor.get()
                     );
                 }
-            }
+            });
         }
     }
 }
-
