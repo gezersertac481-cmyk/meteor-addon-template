@@ -4,6 +4,7 @@ import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
@@ -16,8 +17,9 @@ import org.slf4j.LoggerFactory;
 
 public class AddonTemplate extends MeteorAddon {
     public static final Logger LOG = LoggerFactory.getLogger("ItemTracersAddon");
-    // Kategori ismini 'Custom' yerine Meteor standartlarına uygun küçük harf ID ile güncelledik
     public static final Category CATEGORY = new Category("Custom");
+    // HUD hatasını çözen kritik satır
+    public static final HudGroup HUD_GROUP = new HudGroup("Example"); 
 
     @Override
     public void onInitialize() {
@@ -46,16 +48,11 @@ public class AddonTemplate extends MeteorAddon {
 
             for (Entity entity : mc.world.getEntities()) {
                 if (entity instanceof ItemEntity item) {
-                    // Renk tanımlarını Meteor 1.21.4 API'sine uygun hale getirdik
                     Color color = new Color(255, 255, 255, 150);
-                    if (item.getStack().getItem() == Items.ANCIENT_DEBRIS) {
-                        color = new Color(255, 0, 0, 255);
-                    }
+                    if (item.getStack().getItem() == Items.ANCIENT_DEBRIS) color = new Color(255, 0, 0, 255);
 
-                    // 1.21.4'te kamera pozisyonu 'event.renderer' üzerinden alınmalıdır (Siyah ekranı çözen kısım)
                     Vec3d start = mc.player.getEyePos();
 
-                    // Render sistemi 1.21.4'te daha katı; çizgi çizimini güvenli hale getirdik
                     event.renderer.line(
                         start.x, start.y, start.z,
                         item.getX(), item.getY() + 0.2, item.getZ(),
