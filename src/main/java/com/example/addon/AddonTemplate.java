@@ -21,7 +21,6 @@ import java.util.List;
 public class AddonTemplate extends MeteorAddon {
     public static final Logger LOG = LoggerFactory.getLogger("ItemTracersAddon");
     public static final Category CATEGORY = new Category("Custom");
-    public static final HudGroup HUD_GROUP = new HudGroup("Example");
 
     @Override
     public void onInitialize() {
@@ -41,7 +40,6 @@ public class AddonTemplate extends MeteorAddon {
     public static class ItemTracers extends Module {
         private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-        // Ayar: Sadece seçtiğin eşyalar gözükecek
         private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("items")
             .description("Takip edilecek eşyaları seçin.")
@@ -57,7 +55,7 @@ public class AddonTemplate extends MeteorAddon {
         );
 
         public ItemTracers() {
-            super(CATEGORY, "item-tracers-plus", "Seçili eşyaları ekrandaki artı işaretinden takip eder.");
+            super(CATEGORY, "item-tracers-plus", "Seçili eşyaları artı işaretinden takip eder.");
         }
 
         @EventHandler
@@ -66,18 +64,17 @@ public class AddonTemplate extends MeteorAddon {
 
             for (Entity entity : mc.world.getEntities()) {
                 if (entity instanceof ItemEntity item) {
-                    // Sadece listede olanları çiz
                     if (!items.get().contains(item.getStack().getItem())) continue;
 
-                    // Çizginin gideceği yer (Eşyanın dünyadaki konumu)
+                    // Eşyanın konumu
                     double x = item.lastRenderX + (item.getX() - item.lastRenderX) * event.tickDelta;
-                    double y = item.lastRenderY + (item.getY() - item.lastRenderY) * event.tickDelta + 0.2;
+                    double y = item.lastRenderY + (item.getY() - item.lastRenderY) * event.tickDelta + 0.1;
                     double z = item.lastRenderZ + (item.getZ() - item.lastRenderZ) * event.tickDelta;
 
-                    // Çizginin başlangıcı: Chest ESP gibi TAM artı işareti (Kamera merkezi)
-                    Vec3d start = new Vec3d(0, 0, 75)
-                        .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
-                        .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
+                    // 1.21.4 UYUMLU BAŞLANGIÇ NOKTASI (Crosshair için en stabil yöntem)
+                    Vec3d start = new Vec3d(0, 0, 0.1)
+                        .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getRotation().getX()))
+                        .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getRotation().getY()))
                         .add(mc.gameRenderer.getCamera().getPos());
 
                     event.renderer.line(
