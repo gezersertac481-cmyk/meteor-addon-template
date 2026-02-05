@@ -18,7 +18,6 @@ import net.minecraft.util.math.Vec3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
-import java.util.ArrayList;
 
 public class AddonTemplate extends MeteorAddon {
     public static final Logger LOG = LoggerFactory.getLogger("ItemTracersAddon");
@@ -43,23 +42,23 @@ public class AddonTemplate extends MeteorAddon {
     public static class ItemTracers extends Module {
         private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-        // İSTEDİĞİN ÖZELLİK: Takip edilecek eşya listesini seçme ayarı
+        // ÖZELLİK: İstediğin eşyaları buradan seçeceksin
         private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("items")
-            .description("Takip edilecek eşyaları seçin.")
-            .defaultValue(List.of(Items.ANCIENT_DEBRIS, Items.DIAMOND, Items.NETHERITE_INGOT))
+            .description("Takip edilecek eşyaları seçin (Örn: Antik Kalıntı).")
+            .defaultValue(List.of(Items.ANCIENT_DEBRIS))
             .build()
         );
 
         private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
             .name("line-color")
-            .description("Takip çizgisinin rengi.")
-            .defaultValue(new SettingColor(255, 255, 255, 255))
+            .description("Çizgi rengi.")
+            .defaultValue(new SettingColor(255, 0, 0, 255))
             .build()
         );
 
         public ItemTracers() {
-            super(CATEGORY, "item-tracers-plus", "Yerdeki seçili eşyaları çizgilerle takip eder.");
+            super(CATEGORY, "item-tracers-plus", "Sadece seçili eşyaları takip eder.");
         }
 
         @EventHandler
@@ -68,16 +67,15 @@ public class AddonTemplate extends MeteorAddon {
 
             for (Entity entity : mc.world.getEntities()) {
                 if (entity instanceof ItemEntity item) {
-                    // Sadece listede seçtiğin eşyalar için çizgi çiz
+                    // Sadece listede seçtiğin eşyalar için çizgi çiz (Kırıktaş vb. elenir)
                     if (!items.get().contains(item.getStack().getItem())) continue;
 
-                    // Çizgi başlangıcı: Oyuncunun göz hizası
+                    // HATA DÜZELTME: Modern Minecraft sürümleri için lerp fonksiyonu kullanıyoruz
+                    double x = item.lastRenderX + (item.getX() - item.lastRenderX) * event.tickDelta;
+                    double y = item.lastRenderY + (item.getY() - item.lastRenderY) * event.tickDelta + 0.1;
+                    double z = item.lastRenderZ + (item.getZ() - item.lastRenderZ) * event.tickDelta;
+
                     Vec3d start = mc.player.getEyePos();
-                    
-                    // Çizgi bitişi: Eşyanın tam merkezi (Yere gömülmemesi için +0.2 ekledik)
-                    double x = item.prevX + (item.getX() - item.prevX) * event.tickDelta;
-                    double y = item.prevY + (item.getY() - item.prevY) * event.tickDelta + 0.2;
-                    double z = item.prevZ + (item.getZ() - item.prevZ) * event.tickDelta;
 
                     event.renderer.line(
                         start.x, start.y, start.z,
